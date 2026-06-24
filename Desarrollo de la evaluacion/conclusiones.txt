@@ -1,0 +1,42 @@
+========================================================================
+CONCLUSIONES Y HALLAZGOS DE LA PRUEBA DE PERFORMANCE - EJERCICIO 1
+========================================================================
+
+A continuación se presenta el análisis técnico formal basado estrictamente 
+en la ejecución CLI del script "Plan de Pruebas - Fakestore Service Load Test.jmx" 
+y los datos consolidados en el archivo de logs "resultados_evaluacion.jtl".
+
+------------------------------------------------------------------------
+1. MÉTRICAS CONSOLIDADAS DE LA EJECUCIÓN
+------------------------------------------------------------------------
+- Total de Peticiones Sometidas (#Samples): 300 transacciones.
+- Tiempo de Respuesta Promedio (Avg): 436 ms.
+- Tiempo de Respuesta Mínimo (Min): 399 ms.
+- Tiempo de Respuesta Máximo (Max): 1558 ms.
+- Rendimiento de Procesamiento (Throughput): 8.9 transacciones/segundo (promedio global).
+- Volumen Total de Errores: 1 petición fallida.
+- Tasa de Error Porcentual: 0.33%.
+
+------------------------------------------------------------------------
+2. EVALUACIÓN DE ACUERDOS DE NIVEL DE SERVICIO (SLAs)
+------------------------------------------------------------------------
+
+A) Tasa de Error Aceptable (SLA: Menor al 3%) -> ¡CUMPLIDO!
+   El comportamiento del servidor ante las solicitudes fue sumamente limpio, registrando únicamente un 0.33% de fallas totales, cumpliendo holgadamente con la tolerancia establecida del 3%.
+
+B) Tasa de Procesamiento Objetivo (SLA: Alcanzar al menos 20 TPS) -> OBSERVACIÓN
+   Bajo las condiciones y la temporización configuradas en la prueba actual, el sistema promedió ráfagas máximas estables de entre 9.3/s y 9.8/s, con un cierre global de 8.9 TPS. Para empujar el servicio de login de manera forzada hacia el objetivo de los 20 TPS sostenidos, se recomienda escalar el número de usuarios concurrentes en el "Thread Group -auth/login" e incrementar el límite asignado en el "Temporizador de Rendimiento Constante".
+
+C) Tiempo de Respuesta Permitido (SLA: Máximo 1,500 ms) -> ¡FUERA DE RANGO AISLADO!
+   A nivel general, el backend demostró velocidades de procesamiento óptimas (con medias estables de 414 ms y promedios de 436 ms). Sin embargo, se identificó un pico de degradación aislado en el cual una petición alcanzó los 1,558 ms, lo que activó de forma inmediata la "Aserción de Duración" al superar el límite estricto de 1.5 segundos.
+
+------------------------------------------------------------------------
+3. CONCLUSIÓN GENERAL Y RECOMENDACIÓN
+------------------------------------------------------------------------
+El servicio presenta una salud y velocidad destacables para el 99.67% de la 
+carga evaluada. La única falla técnica registrada no se debió a un colapso 
+de servidor (no hubo errores HTTP 5xx), sino a una fluctuación menor en los 
+tiempos de respuesta máximos (1,558 ms). Se sugiere revisar los mecanismos 
+de manejo de hilos o capas de caché en el endpoint de login de la API para 
+evitar estas pequeñas desviaciones por encima de los 1.5 segundos cuando la 
+concurrencia se mantiene activa.
